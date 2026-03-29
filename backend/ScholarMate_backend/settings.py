@@ -14,9 +14,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "your-default-secret-key-for-dev")
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.environ.get(
-    "DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,34.228.112.95"
-).split(",")
+ALLOWED_HOSTS = ["3.80.47.205"]
 
 # ===== 국제화(i18n) / 시간대 =====
 LANGUAGE_CODE = "ko-kr"
@@ -179,12 +177,8 @@ WSGI_APPLICATION = "ScholarMate_backend.wsgi.application"
 # ===== DB =====
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ["DATABASE_NAME"],
-        "USER": os.environ["DATABASE_USER"],
-        "PASSWORD": os.environ["DATABASE_PASSWORD"],
-        "HOST": os.environ["DATABASE_HOST"],
-        "PORT": os.environ["DATABASE_PORT"],
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
