@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "http://3.80.47.205api/$1"
+      "destination": "http://3.80.47.205/api/$1"
     },
     {
       "source": "/media/(.*)",
