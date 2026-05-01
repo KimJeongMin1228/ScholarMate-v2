@@ -1,60 +1,65 @@
 """
 Django settings for ScholarMate_backend project.
 """
+
 import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
-from corsheaders.defaults import default_headers  # ✅ CORS 기본 헤더 확장용
+from corsheaders.defaults import default_headers
 
-# .env 로드
+# ===== .env 로드 =====
 load_dotenv()
 
-# ===== 경로 & 기본 =====
+# ===== 기본 =====
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "your-default-secret-key-for-dev")
-DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = ["3.80.47.205"]
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-secret-key")
 
-# ===== 국제화(i18n) / 시간대 =====
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "3.80.47.205"
+).split(",")
+
+# ===== HTTPS (Nginx 뒤에서 동작 시 필요) =====
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# ===== 국제화 =====
 LANGUAGE_CODE = "ko-kr"
+TIME_ZONE = "Asia/Seoul"
 USE_I18N = True
-TIME_ZONE = "Asia/Seoul"   # 표시/입력 기준
-USE_TZ = True              # DB 저장은 UTC (권장)
+USE_TZ = True
 
-# ===== 이메일 인증 코드(커스텀 기능용) =====
+# ===== 이메일 인증 =====
 EMAIL_VERIFICATION_CODE_TTL = 120
 EMAIL_VERIFICATION_COOLDOWN = 60
 ENABLE_EMAIL_VERIFICATION = True
 
-# ===== Redis 캐시 =====
+# ===== Redis =====
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.environ.get("REDIS_CACHE_URL", "redis://127.0.0.1:6379/1"),
+        "LOCATION": os.getenv("REDIS_CACHE_URL", "redis://127.0.0.1:6379/1"),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "KEY_PREFIX": "scholarmate",
         "TIMEOUT": 300,
     }
 }
 
-# ===== 이메일(SMTP) =====
+# ===== 이메일 =====
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.naver.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "465"))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "joon6390@naver.com")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "False") == "True"
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True") == "True"
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
-
-CONTACT_ADMIN_EMAILS = [
-    e.strip() for e in os.getenv("CONTACT_ADMIN_EMAILS", "").split(",") if e.strip()
-]
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # ===== 앱 =====
 INSTALLED_APPS = [
-    # django 기본
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -62,8 +67,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # 추가
-    "django.contrib.sites",        # 비번재설정 링크 도메인 구성용
+    "django.contrib.sites",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework.authtoken",
@@ -71,7 +75,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_filters",
 
-    # 프로젝트 앱
     "scholarships",
     "userinfor",
     "contact",
@@ -99,12 +102,10 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
-    "AUTH_HEADER_TYPES": ("Bearer", "JWT"),
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
-    "ALGORITHM": "HS256",
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-# ===== Djoser (비번재설정 핵심) =====
+# ===== DJOSER =====
 DJOSER = {
     "USER_ID_FIELD": "username",
     "SERIALIZERS": {
@@ -120,14 +121,13 @@ DJOSER = {
         "user": ["rest_framework.permissions.IsAuthenticated"],
         "set_password": ["rest_framework.permissions.IsAuthenticated"],
     },
-    # ✅ 프론트엔드 현재 주소만 사용
-    "DOMAIN": os.getenv("FRONTEND_DOMAIN", "https://scholar-mate-chi.vercel.app"),
+    "DOMAIN": os.getenv("FRONTEND_DOMAIN", "https://scholarmate.kro.kr"),
     "SITE_NAME": "ScholarMate",
 }
 
 # ===== 미들웨어 =====
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",            # ✅ 최상단 배치 권장
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -137,11 +137,12 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# ===== CORS/CSRF =====
-CORS_ALLOWED_ORIGINS = os.environ.get(
+# ===== CORS =====
+CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:5173,http://34.228.112.95,https://scholar-mate-chi.vercel.app",
+    "http://localhost:5173,http://3.80.47.205"
 ).split(",")
+
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -149,24 +150,26 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "content-type",
 ]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get(
+# ===== CSRF =====
+CSRF_TRUSTED_ORIGINS = os.getenv(
     "CSRF_TRUSTED_ORIGINS",
-    "http://localhost:5173,http://34.228.112.95,https://scholar-mate-chi.vercel.app",
+    "http://localhost:5173,http://3.80.47.205"
 ).split(",")
 
+# ===== URL =====
 ROOT_URLCONF = "ScholarMate_backend.urls"
 
+# ===== 템플릿 =====
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+              "django.template.context_processors.debug",
+              "django.template.context_processors.request",
+              "django.contrib.auth.context_processors.auth",
+              "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -174,42 +177,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "ScholarMate_backend.wsgi.application"
 
-# ===== DB =====
+# ===== DB (MySQL RDS) =====
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DATABASE_NAME"),
+        "USER": os.getenv("DATABASE_USER"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
+        "HOST": os.getenv("DATABASE_HOST"),
+        "PORT": int(os.getenv("DATABASE_PORT", "3306")),
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
-# ===== 비밀번호 검증 =====
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
-]
-
-# ===== 정적파일 =====
+# ===== 정적 =====
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# ===== API 키 =====
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    print("WARNING: OPENAI_API_KEY 환경 변수가 설정되지 않았습니다.")
-
-SERVICE_KEY = os.environ.get("SERVICE_KEY")
-if not SERVICE_KEY:
-    print("WARNING: SERVICE_KEY 환경 변수가 설정되지 않았습니다.")
-
-# ===== Celery =====
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "Asia/Seoul"
-
+# ===== 기본키 =====
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ===== 디버깅용 =====
+if not all([
+    os.getenv("DATABASE_NAME"),
+    os.getenv("DATABASE_USER"),
+    os.getenv("DATABASE_PASSWORD"),
+    os.getenv("DATABASE_HOST"),
+]):
+    print("🚨 DATABASE ENV 누락됨")
