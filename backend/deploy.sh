@@ -1,7 +1,7 @@
 #!/bin/bash
-set -e  # 에러 나면 즉시 중단
+set -e
 
-echo "Deploy Start"
+echo "Docker Deploy Start"
 
 cd ~/ScholarMate-v2/backend
 
@@ -9,19 +9,17 @@ echo "Pull latest code"
 git fetch origin
 git reset --hard origin/main
 
-echo "Activate venv"
-source venv/bin/activate
+echo "Stop old containers"
+docker-compose -f docker/docker-compose.yml down
 
-echo "Install dependencies"
-pip install -r requirements.txt
+echo "Build and run containers"
+docker-compose -f docker/docker-compose.yml up --build -d
 
-echo "Run migrations"
-python manage.py migrate
+echo "Check containers"
+docker ps
 
-echo "Collect static"
-python manage.py collectstatic --noinput
+echo "Reload host nginx"
+sudo nginx -t
+sudo systemctl reload nginx
 
-echo "Reload gunicorn (zero downtime)"
-sudo systemctl reload gunicorn
-
-echo "Deploy Done"
+echo "Docker Deploy Done"
