@@ -9,16 +9,13 @@ echo "Pull latest code"
 git fetch origin
 git reset --hard origin/main
 
-echo "Stop old containers"
-docker-compose -f docker/docker-compose.yml down
-
-echo "Build and run containers"
+echo "Build and run containers (zero downtime)"
 docker-compose -f docker/docker-compose.yml up --build -d
 
 echo "Check containers"
 docker ps
 
-echo "Reload host nginx"
+echo "Reload nginx"
 sudo nginx -t
 sudo systemctl reload nginx
 
