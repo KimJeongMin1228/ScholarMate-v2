@@ -10,7 +10,7 @@ git fetch origin
 git reset --hard origin/main
 
 echo "Build and run containers (zero downtime)"
-docker-compose -f docker/docker-compose.yml up --build -d
+docker compose -f docker/docker compose.yml up --build -d
 
 echo "Check containers"
 docker ps
