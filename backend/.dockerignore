@@ -1,7 +1,36 @@
+# Python cache
 __pycache__/
 *.pyc
-.env
+
+# Virtual environment
+venv/
+
+# Git
 .git
 .gitignore
-venv/
+
+# Environment variables
+.env
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# Node
 node_modules/
+
+# Docker cache
+docker-compose.override.yml
+
+# Tests / Cache
+.pytest_cache/
+.mypy_cache/
+
+# Local DB
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
