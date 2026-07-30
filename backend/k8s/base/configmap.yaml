@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: django-config
+
+data:
+  DJANGO_DEBUG: "False"
+  DJANGO_ALLOWED_HOSTS: "api.scholarmate-v2.kro.kr"
+  DATABASE_HOST: "replace-with-rds-endpoint"
+  DATABASE_PORT: "3306"
+  DATABASE_NAME: "replace-with-database-name"
+  DATABASE_USER: "replace-with-database-user"
+  REDIS_CACHE_URL: "redis://redis:6379/1:"
