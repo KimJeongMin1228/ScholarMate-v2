@@ -22,4 +22,11 @@ spec:
           image: scholarmate-backend:latest
 
           ports:
-          - containerPort: 8000
+            - containerPort: 8000
+
+          envFrom:
+            - configMapRef:
+                name: django-config
+            - secretRef:
+                name: django-secret
+                
