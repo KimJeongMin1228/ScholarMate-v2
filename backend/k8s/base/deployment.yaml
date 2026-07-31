@@ -45,7 +45,7 @@ spec:
               port: 8000
               httpHeaders:
                 - name: Host
-                  value: apt.scholarmate-2.kro.kr
+                  value: api.scholarmate-2.kro.kr
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 3
