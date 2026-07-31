@@ -20,6 +20,7 @@ spec:
       containers:
         - name: django
           image: scholarmate-backend:latest
+          imagePullPolicy: IfNotPresent
 
           ports:
             - containerPort: 8000

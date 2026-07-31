@@ -11,4 +11,4 @@ data:
   DATABASE_PORT: "3306"
   DATABASE_NAME: "replace-with-database-name"
   DATABASE_USER: "replace-with-database-user"
-  REDIS_CACHE_URL: "redis://redis:6379/1:"
+  REDIS_CACHE_URL: "redis://redis:6379/1"
