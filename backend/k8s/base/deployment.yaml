@@ -43,7 +43,9 @@ spec:
             httpGet:
               path: /
               port: 8000
-
+              httpHeaders:
+                - name: Host
+                  value: apt.scholarmate-2.kro.kr
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 3
@@ -53,7 +55,9 @@ spec:
             httpGet:
               path: /
               port: 8000
-
+              httpHeaders:
+                - name: Host
+                  value: api.scholarmate-v2.kro.kr
             initialDelaySeconds: 30
             periodSeconds: 20
             timeoutSeconds: 3
