@@ -6,10 +6,10 @@ image:
   pullPolicy: Always
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 8000
   targetPort: 8000
-  nodePort: 30080
+  nodePort: null
 
 resources:
   requests:
@@ -48,8 +48,11 @@ redis:
       memory: 256Mi
 
 ingress:
-  enabled: false
+  enabled: true
   className: traefik
   host: api.scholarmate-v2.kro.kr
   path: /
   pathType: Prefix
+  tls:
+    enabled: true
+    secretName: scholarmate-api-tls
