@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+IMAGE_TAG="${1:-latest}"
+
 KUBECONFIG_PATH="/etc/rancher/k3s/k3s.yaml"
 CHART_PATH="backend/helm/scholarmate"
 NAMESPACE="prod"
@@ -8,6 +10,7 @@ RELEASE_NAME="scholarmate"
 
 echo "==============================="
 echo "ScholarMate Helm Deploy Start"
+echo "Image Tag: $IMAGE_TAG"
 echo "==============================="
 
 cd ~/ScholarMate-v2
@@ -24,6 +27,7 @@ sudo helm upgrade --install "$RELEASE_NAME" \
   "$CHART_PATH" \
   --namespace "$NAMESPACE" \
   --kubeconfig "$KUBECONFIG_PATH" \
+  --set image.tag="$IMAGE_TAG" \
   --wait \
   --timeout 5m
 
