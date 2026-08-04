@@ -1,22 +1,43 @@
 #!/bin/bash
 set -e
 
-echo "Docker Deploy Start"
+IMAGE_TAG="${1:-latest}"
 
-cd ~/ScholarMate-v2/backend
+KUBECONFIG_PATH="/etc/rancher/k3s/k3s.yaml"
+CHART_PATH="backend/helm/scholarmate"
+NAMESPACE="prod"
+RELEASE_NAME="scholarmate"
 
-echo "Pull latest code"
+echo "==============================="
+echo "ScholarMate Helm Deploy Start"
+echo "Image Tag: $IMAGE_TAG"
+echo "==============================="
+
+cd ~/ScholarMate-v2
+
+echo "[1/5] Pull latest code"
 git fetch origin
 git reset --hard origin/main
 
-echo "Build and run containers (zero downtime)"
-docker compose -f docker/docker-compose.yml up --build -d
+echo "[2/5] Helm lint"
+helm lint "$CHART_PATH"
 
-echo "Check containers"
-docker ps
+echo "[3/5] Helm upgrade"
+sudo helm upgrade --install "$RELEASE_NAME" \
+  "$CHART_PATH" \
+  --namespace "$NAMESPACE" \
+  --kubeconfig "$KUBECONFIG_PATH" \
+  --set image.tag="$IMAGE_TAG" \
+  --wait \
+  --timeout 5m
 
-echo "Reload nginx"
-sudo nginx -t
-sudo systemctl reload nginx
+echo "[4/5] Rollout status"
+sudo kubectl rollout status deployment/scholarmate-django \
+  --namespace "$NAMESPACE" \
+  --kubeconfig "$KUBECONFIG_PATH" \
+  --timeout=180s
 
-echo "Docker Deploy Done"
+echo "[5/5] Deploy complete"
+sudo helm list \
+  --namespace "$NAMESPACE" \
+  --kubeconfig "$KUBECONFIG_PATH"
